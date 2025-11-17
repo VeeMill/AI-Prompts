@@ -1,0 +1,20 @@
+{
+"action": "JobDescriptionMapping",
+"description": "Map Bullhorn Job Order Data into a standardized HTML posting with strict filtering, section limits, and normalization for the System Role renderer.",
+"mappings": {
+"Job Title": "{{ Job Title }}",
+"Address": "{{ Location | city_state_zip code only }}",
+"Job Description": "{{ Job Description | strip_client_names | strip_pay_info | strip_duration_info | bullet_points | relocate(requirements_to=education) | dedupe | limit(5,7) }}",
+"Critical Information": "{{ (Remote | label_remote) , (Job Description | extract_shift_and_schedule) , (CustomField_CriticalInfo) | strip_pay_info | strip_duration_info | remove_schedule_header | compact_list }}",
+"Education/Licenses Needed": "{{ (CustomField_Education) , (Job Description | extract_requirements) | strip_pay_info | strip_duration_info | credentials_only | dedupe | compact_list }}",
+"Benefits": "DEFAULT"
+},
+"rules": {
+"General": "Remove all references to pay, salary, bill rates, or compensation — no exceptions. Also remove all references to job duration/contract length/term (e.g., 3-month, 6 month, 12-month, through <date>, until <date>, end date, possible extension). Never output a 'Schedule' header; shift/hours belong under Critical Information. Ensure only ONE Benefits section. Drop duplicates across sections. Strip empty bullets and placeholders (N/A, NA, None, No, -, TBA, TBD).",
+"Job Description": "Keep only 5–7 of the strongest duty bullets. Move any licensing/certification/degree phrases to Education/Licenses. Exclude any duration or contract-term details.",
+"Critical Information": "Include: shift/hours, remote/on-site/hybrid, compliance/submission/environment notes. Exclude: pay/bill/salary language and any duration/contract-term details.",
+"Education/Licenses Needed": "Include only credentials, licenses, certifications, degrees, years-of-experience if tied to credentialing. Remove duplicates. Exclude duration.",
+"Address": "Enforce City + State + Zip Code only."
+},
+"output": "Strict HTML block per the System Role specification"
+}
